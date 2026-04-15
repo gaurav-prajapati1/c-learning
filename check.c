@@ -1,58 +1,44 @@
 #include <stdio.h>
-
-// a. Factorial of a number
-unsigned long long factorial(int n) {
-    if (n <= 1)
-        return 1;
-    return n * factorial(n - 1);
-}
-
-// b1. Display digits from left to right
-void displayLeftToRight(int n) {
-    if (n == 0)
-        return;
-    displayLeftToRight(n / 10);
-    printf("%d ", n % 10);
-}
-
-// b2. Display digits from right to left
-void displayRightToLeft(int n) {
-    if (n == 0)
-        return;
-    printf("%d ", n % 10);
-    displayRightToLeft(n / 10);
-}
-
-// c. Compute x^y using only multiplication (y >= 0)
-unsigned long long power(int x, int y) {
-    if (y == 0)
-        return 1;
-    return x * power(x, y - 1);
-}
+#include <math.h>
 
 int main() {
-    int n, x, y;
+    int logical_address, page_number, offset;
+    int page_size, num_pages, frame_number;
+    int page_table[10]; // Simple page table
 
-    // Factorial
-    printf("Enter a number for factorial: ");
-    scanf("%d", &n);
-    printf("Factorial of %d is %llu\n", n, factorial(n));
+    printf("Enter number of pages: ");
+    scanf("%d", &num_pages);
 
-    // Display digits
-    printf("Enter a number to display digits left to right and right to left: ");
-    scanf("%d", &n);
-    printf("Digits left to right: ");
-    if (n == 0) printf("0 ");
-    else displayLeftToRight(n);
-    printf("\nDigits right to left: ");
-    if (n == 0) printf("0 ");
-    else displayRightToLeft(n);
-    printf("\n");
+    printf("Enter page size (in words): ");
+    scanf("%d", &page_size);
 
-    // Power
-    printf("Enter base and exponent (x y) to compute x^y: ");
-    scanf("%d %d", &x, &y);
-    printf("%d^%d = %llu\n", x, y, power(x, y));
+    // Input frame number for each page
+    printf("Enter frame number for each page:\n");
+    for(int i = 0; i < num_pages; i++) {
+        printf("Page %d -> Frame #: ", i);
+        scanf("%d", &page_table[i]);
+    }
+
+    printf("\nEnter logical address to access: ");
+    scanf("%d", &logical_address);
+
+    // Calculate page number and offset
+    page_number = logical_address / page_size;
+    offset = logical_address % page_size;
+
+    if(page_number >= num_pages) {
+        printf("Invalid logical address!\n");
+        return 1;
+    }
+
+    // Physical address = frame_number * page_size + offset
+    frame_number = page_table[page_number];
+    int physical_address = frame_number * page_size + offset;
+
+    printf("\nLogical Address: %d\n", logical_address);
+    printf("Page Number: %d\n", page_number);
+    printf("Offset: %d\n", offset);
+    printf("Physical Address: %d\n", physical_address);
 
     return 0;
 }
