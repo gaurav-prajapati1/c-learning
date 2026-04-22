@@ -1,44 +1,138 @@
 #include <stdio.h>
-#include <math.h>
+#include <stdlib.h>
 
-int main() {
-    int logical_address, page_number, offset;
-    int page_size, num_pages, frame_number;
-    int page_table[10]; // Simple page table
+// Node structure
+struct node
+{
+    int data;
+    struct node *left;
+    struct node *right;
+};
 
-    printf("Enter number of pages: ");
-    scanf("%d", &num_pages);
+// Create new node
+struct node* createNode(int value)
+{
+    struct node* newnode;
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = value;
+    newnode->left = NULL;
+    newnode->right = NULL;
+    return newnode;
+}
 
-    printf("Enter page size (in words): ");
-    scanf("%d", &page_size);
+// Insert node
+struct node* insert(struct node* root, int value)
+{
+    if(root == NULL)
+        return createNode(value);
 
-    // Input frame number for each page
-    printf("Enter frame number for each page:\n");
-    for(int i = 0; i < num_pages; i++) {
-        printf("Page %d -> Frame #: ", i);
-        scanf("%d", &page_table[i]);
+    if(value < root->data)
+        root->left = insert(root->left, value);
+    else if(value > root->data)
+        root->right = insert(root->right, value);
+
+    return root;
+}
+
+// Find minimum value node
+struct node* findMin(struct node* root)
+{
+    while(root->left != NULL)
+        root = root->left;
+    return root;
+}
+
+// Delete node
+struct node* deleteNode(struct node* root, int value)
+{
+    struct node* temp;
+
+    if(root == NULL)
+        return root;
+
+    if(value < root->data)
+        root->left = deleteNode(root->left, value);
+    else if(value > root->data)
+        root->right = deleteNode(root->right, value);
+    else
+    {
+        // Node with one child or no child
+        if(root->left == NULL)
+        {
+            temp = root->right;
+            free(root);
+            return temp;
+        }
+        else if(root->right == NULL)
+        {
+            temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        // Node with two children
+        temp = findMin(root->right);
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data);
     }
 
-    printf("\nEnter logical address to access: ");
-    scanf("%d", &logical_address);
+    return root;
+}
 
-    // Calculate page number and offset
-    page_number = logical_address / page_size;
-    offset = logical_address % page_size;
-
-    if(page_number >= num_pages) {
-        printf("Invalid logical address!\n");
-        return 1;
+// Inorder traversal
+void inorder(struct node* root)
+{
+    if(root != NULL)
+    {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
     }
+}
 
-    // Physical address = frame_number * page_size + offset
-    frame_number = page_table[page_number];
-    int physical_address = frame_number * page_size + offset;
+// Main menu
+int main()
+{
+    struct node* root = NULL;
+    int choice, value;
 
-    printf("\nLogical Address: %d\n", logical_address);
-    printf("Page Number: %d\n", page_number);
-    printf("Offset: %d\n", offset);
-    printf("Physical Address: %d\n", physical_address);
+    while(1)
+    {
+        printf("\n--- BST MENU ---\n");
+        printf("1. Insert\n");
+        printf("2. Delete\n");
+        printf("3. Display (Inorder)\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice)
+        {
+            case 1:
+                printf("Enter value to insert: ");
+                scanf("%d", &value);
+                root = insert(root, value);
+                break;
+
+            case 2:
+                printf("Enter value to delete: ");
+                scanf("%d", &value);
+                root = deleteNode(root, value);
+                break;
+
+            case 3:
+                printf("BST elements (Inorder): ");
+                inorder(root);
+                printf("\n");
+                break;
+
+            case 4:
+                return 0;
+
+            default:
+                printf("Invalid choice\n");
+        }
+    }
 
     return 0;
 }
